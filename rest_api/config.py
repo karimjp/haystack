@@ -1,6 +1,7 @@
 import ast
 import os
 
+
 # FastAPI
 PROJECT_NAME = os.getenv("PROJECT_NAME", "FastAPI")
 
@@ -12,15 +13,15 @@ BATCHSIZE = int(os.getenv("BATCHSIZE", 50))
 CONCURRENT_REQUEST_PER_WORKER = int(os.getenv("CONCURRENT_REQUEST_PER_WORKER", 4))
 
 # DB
-DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_HOST = os.getenv("DB_HOST", os.environ['ELASTIC_HOST'])
 DB_PORT = int(os.getenv("DB_PORT", 9200))
-DB_USER = os.getenv("DB_USER", "")
-DB_PW = os.getenv("DB_PW", "")
+DB_USER = os.getenv("DB_USER", "elastic")
+DB_PW = os.getenv("DB_PW", os.environ['ELASTIC_PASSWORD'])
 DB_INDEX = os.getenv("DB_INDEX", "document")
 DB_INDEX_FEEDBACK = os.getenv("DB_INDEX_FEEDBACK", "label")
 ES_CONN_SCHEME = os.getenv("ES_CONN_SCHEME", "http")
-TEXT_FIELD_NAME = os.getenv("TEXT_FIELD_NAME", "text")
-SEARCH_FIELD_NAME = os.getenv("SEARCH_FIELD_NAME", "text")
+TEXT_FIELD_NAME = os.getenv("TEXT_FIELD_NAME", "context")
+SEARCH_FIELD_NAME = os.getenv("SEARCH_FIELD_NAME", "context")
 FAQ_QUESTION_FIELD_NAME = os.getenv("FAQ_QUESTION_FIELD_NAME", "question")
 EMBEDDING_FIELD_NAME = os.getenv("EMBEDDING_FIELD_NAME", None)
 EMBEDDING_DIM = os.getenv("EMBEDDING_DIM", None)
