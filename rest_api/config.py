@@ -13,10 +13,10 @@ BATCHSIZE = int(os.getenv("BATCHSIZE", 50))
 CONCURRENT_REQUEST_PER_WORKER = int(os.getenv("CONCURRENT_REQUEST_PER_WORKER", 4))
 
 # DB
-DB_HOST = os.getenv("DB_HOST", os.environ['ELASTIC_HOST'])
+DB_HOST = os.getenv("DB_HOST", os.getenv("ELASTIC_HOST","localhost"))
 DB_PORT = int(os.getenv("DB_PORT", 9200))
-DB_USER = os.getenv("DB_USER", "elastic")
-DB_PW = os.getenv("DB_PW", os.environ['ELASTIC_PASSWORD'])
+DB_USER = os.getenv("DB_USER", os.getenv("ELASTIC_USER",""))
+DB_PW = os.getenv("DB_PW", os.getenv("ELASTIC_PASSWORD",""))
 DB_INDEX = os.getenv("DB_INDEX", "document")
 DB_INDEX_FEEDBACK = os.getenv("DB_INDEX_FEEDBACK", "label")
 ES_CONN_SCHEME = os.getenv("ES_CONN_SCHEME", "http")
