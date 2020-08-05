@@ -1,15 +1,14 @@
 from abc import abstractmethod, ABC
-from typing import Any, Optional, Dict, List, Union
-from uuid import UUID, uuid4
+from typing import Any, Optional, Dict, List
+from uuid import uuid4
 
 
 class Document:
     def __init__(self, text: str,
-                 id: Optional[Union[str, UUID]] = None,
+                 id: str = None,
                  query_score: Optional[float] = None,
                  question: Optional[str] = None,
                  meta: Dict[str, Any] = None,
-                 tags: Optional[Dict[str, Any]] = None,
                  embedding: Optional[List[float]] = None):
         """
         Object used to represent documents / passages in a standardized way within Haystack.
@@ -24,24 +23,19 @@ class Document:
         :param query_score: Retriever's query score for a retrieved document
         :param question: Question text for FAQs.
         :param meta: Meta fields for a document like name, url, or author.
-        :param tags: Tags that allow filtering of the data
         :param embedding: Vector encoding of the text
         """
 
         self.text = text
         # Create a unique ID (either new one, or one from user input)
         if id:
-            if isinstance(id, str):
-                self.id = UUID(hex=str(id), version=4)
-            if isinstance(id, UUID):
-                self.id = id
+            self.id = str(id)
         else:
-            self.id = uuid4()
+            self.id = str(uuid4())
 
         self.query_score = query_score
         self.question = question
         self.meta = meta
-        self.tags = tags # deprecate?
         self.embedding = embedding
 
     def to_dict(self):
@@ -50,7 +44,7 @@ class Document:
     @classmethod
     def from_dict(cls, dict):
         _doc = dict.copy()
-        init_args = ["text", "id", "query_score", "question", "meta", "tags", "embedding"]
+        init_args = ["text", "id", "query_score", "question", "meta", "embedding"]
         if "meta" not in _doc.keys():
             _doc["meta"] = {}
         # copy additional fields into "meta"
@@ -69,7 +63,7 @@ class Label:
                  is_correct_answer: bool,
                  is_correct_document: bool,
                  origin: str,
-                 document_id: Optional[UUID] = None,
+                 document_id: Optional[str] = None,
                  offset_start_in_doc: Optional[int] = None,
                  no_answer: Optional[bool] = None,
                  model_id: Optional[int] = None):
@@ -95,13 +89,7 @@ class Label:
         self.question = question
         self.is_correct_answer = is_correct_answer
         self.is_correct_document = is_correct_document
-        if document_id:
-            if isinstance(document_id, str):
-                self.document_id: Optional[UUID] = UUID(hex=str(document_id), version=4)
-            if isinstance(document_id, UUID):
-                self.document_id = document_id
-        else:
-            self.document_id = document_id
+        self.document_id = document_id
         self.answer = answer
         self.offset_start_in_doc = offset_start_in_doc
         self.model_id = model_id
@@ -119,14 +107,15 @@ class BaseDocumentStore(ABC):
     Base class for implementing Document Stores.
     """
     index: Optional[str]
+    label_index: Optional[str]
 
     @abstractmethod
     def write_documents(self, documents: List[dict], index: Optional[str] = None):
         """
         Indexes documents for later queries.
 
-        :param documents: List of dictionaries.
-                          Default format: {"text": "<the-actual-text>"}
+        :param documents: a list of Python dictionaries or a list of Haystack Document objects.
+                          For documents as dictionaries, the format is {"text": "<the-actual-text>"}.
                           Optionally: Include meta data via {"text": "<the-actual-text>",
                           "meta":{"name": "<some-document-name>, "author": "somebody", ...}}
                           It can be used for filtering and is accessible in the responses of the Finder.
@@ -138,19 +127,15 @@ class BaseDocumentStore(ABC):
         pass
 
     @abstractmethod
-    def get_all_documents(self, index: Optional[str] = None) -> List[Document]:
+    def get_all_documents(self, index: Optional[str] = None, filters: Optional[Dict[str, List[str]]] = None) -> List[Document]:
         pass
 
     @abstractmethod
-    def get_all_labels(self, index: str = "label", filters: Optional[dict] = None) -> List[Label]:
+    def get_all_labels(self, index: str = "label", filters: Optional[Optional[Dict[str, List[str]]]] = None) -> List[Label]:
         pass
 
     @abstractmethod
-    def get_document_by_id(self, id: UUID, index: Optional[str] = None) -> Optional[Document]:
-        pass
-
-    @abstractmethod
-    def get_document_ids_by_tags(self, tag, index) -> List[str]:
+    def get_document_by_id(self, id: str, index: Optional[str] = None) -> Optional[Document]:
         pass
 
     @abstractmethod
@@ -160,7 +145,7 @@ class BaseDocumentStore(ABC):
     @abstractmethod
     def query_by_embedding(self,
                            query_emb: List[float],
-                           filters: Optional[dict] = None,
+                           filters: Optional[Optional[Dict[str, List[str]]]] = None,
                            top_k: int = 10,
                            index: Optional[str] = None) -> List[Document]:
         pass
