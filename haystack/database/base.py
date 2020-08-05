@@ -2,6 +2,8 @@ from abc import abstractmethod, ABC
 from typing import Any, Optional, Dict, List, Union
 from uuid import uuid4
 
+import numpy as np
+
 
 class Document:
     def __init__(self, text: str,
@@ -9,7 +11,7 @@ class Document:
                  query_score: Optional[float] = None,
                  question: Optional[str] = None,
                  meta: Dict[str, Any] = None,
-                 embedding: Optional[List[float]] = None):
+                 embedding: Optional[np.array] = None):
         """
         Object used to represent documents / passages in a standardized way within Haystack.
         For example, this is what the retriever will return from the DocumentStore,
